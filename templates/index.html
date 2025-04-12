@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE EYE - Your World Journalist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='images/badge.png') }}" alt="Badge" class="badge">
+            <div class="title-slogan">
+                <h1>THE EYE</h1>
+                <p>Your World Journalist</p>
+            </div>
+            <span class="hamburger">☰</span>
+        </div>
+        <div class="nav-center">
+            <ul class="categories">
+                <li><a href="{{ url_for('home', category='Home') }}">Home</a></li>
+                <li><a href="{{ url_for('home', category='Tech') }}">Tech</a></li>
+                <li><a href="{{ url_for('home', category='Education') }}">Education</a></li>
+                <li><a href="{{ url_for('home', category='Sports') }}">Sports</a></li>
+                <li><a href="{{ url_for('home', category='Tourism') }}">Tourism</a></li>
+                <li><a href="{{ url_for('home', category='Climate') }}">Climate</a></li>
+                <li><a href="{{ url_for('home', category='Politics') }}">Politics</a></li>
+                <li><a href="{{ url_for('home', category='Health') }}">Health</a></li>
+                <li><a href="{{ url_for('home', category='Business') }}">Business</a></li>
+                <li><a href="{{ url_for('home', category='Entertainment') }}">Entertainment</a></li>
+                <li><a href="{{ url_for('home', category='Science') }}">Science</a></li>
+            </ul>
+            <div class="nav-filters">
+                <form class="search-bar" method="GET" action="{{ url_for('home') }}">
+                    <input type="text" name="search" placeholder="Search news..." value="{{ request.args.get('search', '') }}">
+                    <button type="submit">🔍</button>
+                </form>
+                <select class="language-selector" onchange="alert('Language change coming soon!')">
+                    <option value="en">English</option>
+                    <option value="zh">Mandarin</option>
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="ar">Arabic</option>
+                    <option value="bn">Bengali</option>
+                    <option value="ru">Russian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ur">Urdu</option>
+                </select>
+                <select class="continent-filter" onchange="location = this.value;">
+                    <option value="">All Continents</option>
+                    <option value="{{ url_for('home', continent='Africa') }}">Africa</option>
+                    <option value="{{ url_for('home', continent='Asia') }}">Asia</option>
+                    <option value="{{ url_for('home', continent='Australia') }}">Australia</option>
+                    <option value="{{ url_for('home', continent='Europe') }}">Europe</option>
+                    <option value="{{ url_for('home', continent='North America') }}">North America</option>
+                    <option value="{{ url_for('home', continent='South America') }}">South America</option>
+                </select>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-section">
+                <span class="profile-icon">🧑</span>
+                <div class="dropdown">
+                    {% if current_user.is_authenticated %}
+                        <div class="user-details">
+                            <p>{{ current_user.username }}</p>
+                            <p>{{ current_user.email }}</p>
+                            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                            {% if current_user.is_admin %}
+                                <a href="{{ url_for('upload_article') }}" class="upload-btn">Upload Article</a>
+                                <a href="{{ url_for('admin_dashboard') }}" class="dashboard-btn">Dashboard</a>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="login-form">
+                            <h3>Login</h3>
+                            <form method="POST" action="{{ url_for('login') }}">
+                                <input type="text" name="username" placeholder="Username" required>
+                                <input type="password" name="password" placeholder="Password" required>
+                                <button type="submit">Login</button>
+                                <a href="#" class="forgot-password">Forgot Password?</a>
+                                <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <span id="theme-toggle" class="theme-icon">🌙</span>
+        </div>
+    </nav>
+    <div class="container">
+        <div id="clock"></div>
+        <div class="apk-download">
+            <a href="{{ url_for('download_apk') }}" class="download-btn">Download THE EYE APK</a>
+        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="flash-message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="articles-grid">
+            {% for article in articles %}
+                <div class="article-card {% if article.is_hot %}hot-news{% endif %}" data-article-id="{{ article.id }}">
+                    <div class="location">
+                        <span class="location-icon">📍</span>
+                        <span>{{ article.country }}</span>
+                    </div>
+                    <h2>{{ article.title }}</h2>
+                    {% if article.image_list %}
+                        <img src="{{ url_for('static', filename='images/' + article.image_list[0]) }}" alt="Article Thumbnail" class="article-image">
+                    {% endif %}
+                    <p>{{ article.summary }}</p>
+                    <p>Posted: <span class="article-time" data-utc="{{ article.date_posted.isoformat() }}"></span></p>
+                    <div class="image-table" style="display: none;">
+                        <table>
+                            <tr>
+                                {% for image in article.image_list %}
+                                    <td><img src="{{ url_for('static', filename='images/' + image) }}" alt="Article Image" class="thumbnail" data-full="{{ url_for('static', filename='images/' + image) }}"></td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                    <a href="{{ url_for('article_detail', article_id=article.id) }}" class="article-link">Read More</a>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('home', page=pagination.prev_num, category=request.args.get('category'), continent=request.args.get('continent'), search=request.args.get('search')) }}">« Previous</a>
+            {% endif %}
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                        <span class="current-page">{{ page_num }}</span>
+                    {% else %}
+                        <a href="{{ url_for('home', page=page_num, category=request.args.get('category'), continent=request.args.get('continent'), search=request.args.get('search')) }}">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+                <a href="{{ url_for('home', page=pagination.next_num, category=request.args.get('category'), continent=request.args.get('continent'), search=request.args.get('search')) }}">Next »</a>
+            {% endif %}
+        </div>
+        <div id="image-modal" class="modal">
+            <span class="close">×</span>
+            <img id="modal-image" src="" alt="Enlarged Image">
+            <div class="menu">
+                <span class="menu-dots">⋮</span>
+                <div class="menu-options">
+                    <a id="download-link" href="#">Download Image</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerHTML = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.querySelectorAll('.article-time').forEach(el => {
+            const utcTime = new Date(el.getAttribute('data-utc'));
+            el.innerHTML = utcTime.toLocaleString();
+        });
+
+        document.querySelector('.hamburger').addEventListener('click', () => {
+            document.querySelector('.nav-center').classList.toggle('active');
+        });
+
+        document.querySelectorAll('.article-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('article-link') && !e.target.classList.contains('thumbnail')) {
+                    const table = card.querySelector('.image-table');
+                    table.style.display = table.style.display === 'none' ? 'block' : 'none';
+                    e.preventDefault();
+                }
+            });
+        });
+
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-image');
+        const downloadLink = document.getElementById('download-link');
+        const close = document.querySelector('.close');
+        const menuDots = document.querySelector('.menu-dots');
+        const menuOptions = document.querySelector('.menu-options');
+
+        document.querySelectorAll('.thumbnail').forEach(img => {
+            img.addEventListener('click', () => {
+                const articleId = img.closest('.article-card').getAttribute('data-article-id');
+                const imageName = img.src.split('/').pop();
+                modal.style.display = 'block';
+                modalImg.src = img.getAttribute('data-full');
+                downloadLink.href = `/article/${articleId}/download_image/${imageName}`;
+            });
+        });
+
+        close.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        menuDots.addEventListener('click', () => {
+            menuOptions.style.display = menuOptions.style.display === 'block' ? 'none' : 'block';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+            if (!e.target.closest('.menu')) {
+                menuOptions.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

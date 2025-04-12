@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Article - THE EYE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='images/badge.png') }}" alt="Badge" class="badge">
+            <div class="title-slogan">
+                <h1>THE EYE</h1>
+                <p>Your World Journalist</p>
+            </div>
+            <span class="hamburger">☰</span>
+        </div>
+        <div class="nav-center">
+            <ul class="categories">
+                <li><a href="{{ url_for('home', category='Home') }}">Home</a></li>
+                <li><a href="{{ url_for('home', category='Tech') }}">Tech</a></li>
+                <li><a href="{{ url_for('home', category='Education') }}">Education</a></li>
+                <li><a href="{{ url_for('home', category='Sports') }}">Sports</a></li>
+                <li><a href="{{ url_for('home', category='Tourism') }}">Tourism</a></li>
+                <li><a href="{{ url_for('home', category='Climate') }}">Climate</a></li>
+                <li><a href="{{ url_for('home', category='Politics') }}">Politics</a></li>
+                <li><a href="{{ url_for('home', category='Health') }}">Health</a></li>
+                <li><a href="{{ url_for('home', category='Business') }}">Business</a></li>
+                <li><a href="{{ url_for('home', category='Entertainment') }}">Entertainment</a></li>
+                <li><a href="{{ url_for('home', category='Science') }}">Science</a></li>
+            </ul>
+            <div class="nav-filters">
+                <form class="search-bar" method="GET" action="{{ url_for('home') }}">
+                    <input type="text" name="search" placeholder="Search news...">
+                    <button type="submit">🔍</button>
+                </form>
+                <select class="language-selector" onchange="alert('Language change coming soon!')">
+                    <option value="en">English</option>
+                    <option value="zh">Mandarin</option>
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="ar">Arabic</option>
+                    <option value="bn">Bengali</option>
+                    <option value="ru">Russian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ur">Urdu</option>
+                </select>
+                <select class="continent-filter" onchange="location = this.value;">
+                    <option value="">All Continents</option>
+                    <option value="{{ url_for('home', continent='Africa') }}">Africa</option>
+                    <option value="{{ url_for('home', continent='Asia') }}">Asia</option>
+                    <option value="{{ url_for('home', continent='Australia') }}">Australia</option>
+                    <option value="{{ url_for('home', continent='Europe') }}">Europe</option>
+                    <option value="{{ url_for('home', continent='North America') }}">North America</option>
+                    <option value="{{ url_for('home', continent='South America') }}">South America</option>
+                </select>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-section">
+                <span class="profile-icon">🧑</span>
+                <div class="dropdown">
+                    <div class="user-details">
+                        <p>{{ current_user.username }}</p>
+                        <p>{{ current_user.email }}</p>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                        <a href="{{ url_for('upload_article') }}" class="upload-btn">Upload Article</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="dashboard-btn">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            <span id="theme-toggle" class="theme-icon">🌙</span>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Upload New Article</h1>
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <input type="text" name="title" placeholder="Title" required>
+            <textarea name="summary" placeholder="Summary" required></textarea>
+            <textarea name="content" placeholder="Full Details" required class="dynamic-textarea"></textarea>
+            <select name="category" required>
+                <option value="Tech">Tech</option>
+                <option value="Education">Education</option>
+                <option value="Sports">Sports</option>
+                <option value="Tourism">Tourism</option>
+                <option value="Climate">Climate</option>
+                <option value="Politics">Politics</option>
+                <option value="Health">Health</option>
+                <option value="Business">Business</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Science">Science</option>
+            </select>
+            <select name="continent" required>
+                <option value="Africa">Africa</option>
+                <option value="Asia">Asia</option>
+                <option value="Australia">Australia</option>
+                <option value="Europe">Europe</option>
+                <option value="North America">North America</option>
+                <option value="South America">South America</option>
+            </select>
+            <input type="text" name="country" placeholder="Country" required>
+            <label>Images: <input type="file" name="images" accept="image/*" multiple></label>
+            <label>Video (optional): <input type="file" name="video" accept="video/*"></label>
+            <label><input type="checkbox" name="is_hot"> Mark as Hot News</label>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+    <script>
+        document.querySelector('.dynamic-textarea').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        document.querySelector('.hamburger').addEventListener('click', () => {
+            document.querySelector('.nav-center').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
