@@ -38,7 +38,6 @@ def init_app():
     with app.app_context():
         from models import User
         db.create_all()
-        # Create or reset master admin
         master_admin = User.query.filter_by(email='elvismalcom9@gmail.com').first()
         if master_admin:
             master_admin.password = bcrypt.generate_password_hash('Reddevil@256').decode('utf-8')
@@ -61,6 +60,5 @@ from routes import *
 
 if __name__ == '__main__':
     init_app()
-    # Use Heroku's PORT or default to 5000
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
