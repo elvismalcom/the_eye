@@ -5,23 +5,19 @@ from flask_bcrypt import Bcrypt
 # Initialize Flask app
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-# Handle Render's DATABASE_URL
+# Handle Heroku's DATABASE_URL
 db_uri = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
-if db_uri.startswith('postgres://'):
-    db_uri = db_uri.replace('postgres://', 'postgresql://', 1)
+if db_uri and db_uri.startswith('postgres://'):
+    db_uri = db_uri.replace('postgres://', 'postgresql://', 1) + '?sslmode=require'
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Apply sslmode only for PostgreSQL
-if db_uri.startswith('postgresql://'):
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {'sslmode': 'require'}
-    }
-else:
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {'sslmode': 'require'} if db_uri.startswith('postgresql://') else {}
+}
 
 # Ensure static directories exist
 base_dir = os.path.abspath(os.path.dirname(__file__))
-static_dir = os.path.join(base_dir, '../static')  # Adjusted for root static/
+static_dir = os.path.join(base_dir, '../static')
 os.makedirs(os.path.join(static_dir, 'images'), exist_ok=True)
 os.makedirs(os.path.join(static_dir, 'videos'), exist_ok=True)
 os.makedirs(os.path.join(static_dir, 'apks'), exist_ok=True)
@@ -65,4 +61,6 @@ from routes import *
 
 if __name__ == '__main__':
     init_app()
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    # Use Heroku's PORT or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
